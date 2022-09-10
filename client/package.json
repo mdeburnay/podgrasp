@@ -1,6 +1,11 @@
 {
   "name": "client",
   "version": "0.1.2",
+  "scripts": {
+    "start": "",
+    "dev": "HTTPS=true PORT=8080 react-scripts start",
+    "build": "react-scripts build"
+  },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
