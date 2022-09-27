@@ -1,14 +1,20 @@
-FROM jarredsumner/bun:edge
+# Dev
+FROM node:latest AS dev
 
 WORKDIR /usr/src/app
 
-COPY *.package.json ./
+ENV NODE_ENV production
+
+COPY package*.json ./
+
+RUN yarn --no-progress
+
+RUN yarn add react-scripts -g --silent
+
 COPY . .
 
-RUN bun install
+RUN yarn build
 
-COPY . .
+EXPOSE 8080
 
-RUN bun build
-
-EXPOSE 3030
+CMD [ "npm", "run", "dev" ]

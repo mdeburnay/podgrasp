@@ -1,16 +1,12 @@
-# syntax=docker/dockerfile:1
-
-FROM golang:1.16-alpine AS development
+# Dev
+FROM golang:latest AS development
 
 WORKDIR /usr/src/app
 
-COPY go.mod ./
-COPY go.sum ./
-
-RUN go mod download
-
-COPY *.go ./
+COPY . .
 
 RUN go build -o main .
 
 EXPOSE 9090
+
+CMD ["/usr/src/app"]
