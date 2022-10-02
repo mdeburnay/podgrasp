@@ -1,5 +1,4 @@
-# Dev
-FROM golang:1.16-alpine
+FROM golang:1.19
 
 WORKDIR /usr/src/app
 
@@ -9,8 +8,8 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-RUN go build -o main /usr/src/app/main.go
+RUN go build -v -o /usr/bin/app .
 
-EXPOSE 9090
+EXPOSE "9090"
 
-ENTRYPOINT ["./main"]
+CMD ["app"]
