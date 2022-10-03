@@ -1,8 +1,32 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+// Dependencies
+import React, { useState } from "react";
+import axios from "axios";
+
+// Styles
+import logo from "./logo.svg";
+import "./App.css";
 
 function App() {
+  const [url, setUrl] = useState<string>("");
+  const [data, setData] = useState<string>("");
+
+  const handlePasswordChange = (e: any) => {
+    setUrl(e.target.value);
+  };
+
+  const handleSubmit = async (event: any) => {
+    console.log("submitting");
+
+    event.preventDefault();
+
+    const data: any = await axios
+      .post("http://localhost:9090/", url)
+      .then((res) => {
+        console.log(res.data.replaceAll("\n", ""));
+      });
+    setData(data);
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -18,6 +42,18 @@ function App() {
         >
           Learn React
         </a>
+        <form>
+          <input
+            type="url"
+            name="URL"
+            value={url}
+            onChange={handlePasswordChange}
+          />
+          <button type="button" onClick={handleSubmit}>
+            Login
+          </button>
+        </form>
+        {data && <div>{data}</div>}
       </header>
     </div>
   );
