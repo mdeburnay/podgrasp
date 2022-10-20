@@ -6,7 +6,7 @@ import (
 )
 
 // PORT trigger
-const PORT string = ":9090"
+const PORT string = "localhost:9090"
 
 func main() {
 		r := routes.SetupRouter()
