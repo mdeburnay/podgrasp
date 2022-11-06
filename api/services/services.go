@@ -30,54 +30,58 @@ func EllorM8(ctx *gin.Context) {
 }
 
 func SendEmail(ctx *gin.Context) {
-	err := godotenv.Load()
+
+    err := godotenv.Load("../.env")
+
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	
-	sendgridKey := os.Getenv("SENDGRID_API_KEY")
 
-	from := mail.NewEmail("Example User", "de_burnay@hotmail.co.uk")
-	subject := "Sending with SendGrid is Fun"
-	to := mail.NewEmail("Example User", "deburnayb@gmail.com")
-	plainTextContent := "and easy to do anywhere, even with Go"
-	htmlContent := "<strong>and easy to do anywhere, even with Go</strong>"
-	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	client := sendgrid.NewSendClient(sendgridKey)
-	response, err := client.Send(message)
-	if err != nil {
-		log.Println(err)
-	} else {
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Body)
-		fmt.Println(response.Headers)
-	}
-}
-
-func GetPodcastNotes(ctx *gin.Context) {
     var requestBody UrlRequestBody
 
     if err := ctx.ShouldBindJSON(&requestBody); err != nil {
         ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
+    
+    var PodcastHTML = GetPodcastNotes(requestBody.URL);
+    
+    sendgridKey := os.Getenv("SENDGRID_API_KEY")
 
+    from := mail.NewEmail("Podgrasp", "YOUR_SENDGRID_VERIFIED_SENDER_EMAIL_ADDRESS")
+    subject := "New Podcast Notes From ${Insert Podcast Name Here}"
+    to := mail.NewEmail("Example User", "USER_EMAIL_ADDRESS")
+    plainTextContent := "Boop beep bap"
+    htmlContent := PodcastHTML
+    message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+    client := sendgrid.NewSendClient(sendgridKey)
+    response, err := client.Send(message)
+    if err != nil {
+     log.Println(err)
+    } else {
+     fmt.Println(response.StatusCode)
+     fmt.Println(response.Body)
+     fmt.Println(response.Headers)
+    }
+}
+
+func GetPodcastNotes(podcastURL string) (string) {
+	fmt.Println("Getting podcast notes for: " + podcastURL)
+    var article string
     c := colly.NewCollector(
         colly.AllowedDomains("www.podcastnotes.org", "podcastnotes.org"),
     )
 
     c.OnHTML("article", func(e *colly.HTMLElement) {
         articleHTML, err := e.DOM.Html()
-        fmt.Println(articleHTML)
         if err != nil {
-            ctx.JSON(http.StatusInternalServerError, gin.H{
-                "message": "error",
-            })
+            log.Fatal(err)
         }
-        ctx.JSON(http.StatusOK, gin.H{
-            "article": articleHTML,
-        })
+        article = articleHTML
     })
 
-    c.Visit(requestBody.URL)
+    c.Visit(podcastURL)
+
+    return article
 }
+

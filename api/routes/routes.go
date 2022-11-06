@@ -22,8 +22,7 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/", services.EllorM8)
-	r.GET("/podcastnotes", services.GetPodcastNotes)
-	r.POST("/sendEmail", services.SendEmail)
+	r.GET("/send-email", services.SendEmail)
 
 	return r
 }
