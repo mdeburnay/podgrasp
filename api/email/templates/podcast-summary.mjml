@@ -1,9 +1,7 @@
 <mjml>
-    <mj-body>
-        <mj-section>
-            <mj-column>
-            <mj-text font-size="20px" color="#F45E43" font-family="helvetica">Hello World</mj-text>
-            </mj-column>
-        </mj-section>
+    <mj-body background-color="#FFFFFF">
+        <mj-include path="../components/header.mjml" />
+        <mj-include path="../components/body.mjml" />
+        <mj-include path="../components/footer.mjml" />
     </mj-body>
 </mjml>

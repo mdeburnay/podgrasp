@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
 	"github.com/joho/godotenv"
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 type UrlRequestBody struct {
@@ -45,24 +42,28 @@ func SendEmail(ctx *gin.Context) {
     }
     
     var PodcastHTML = GetPodcastNotes(requestBody.URL);
-    
-    sendgridKey := os.Getenv("SENDGRID_API_KEY")
 
-    from := mail.NewEmail("Podgrasp", "YOUR_SENDGRID_VERIFIED_SENDER_EMAIL_ADDRESS")
-    subject := "New Podcast Notes From ${Insert Podcast Name Here}"
-    to := mail.NewEmail("Example User", "USER_EMAIL_ADDRESS")
-    plainTextContent := "Boop beep bap"
-    htmlContent := PodcastHTML
-    message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-    client := sendgrid.NewSendClient(sendgridKey)
-    response, err := client.Send(message)
-    if err != nil {
-     log.Println(err)
-    } else {
-     fmt.Println(response.StatusCode)
-     fmt.Println(response.Body)
-     fmt.Println(response.Headers)
-    }
+    var FormattedEmail = FormatEmail(PodcastHTML);
+
+    fmt.Println(FormattedEmail)
+    
+    // sendgridKey := os.Getenv("SENDGRID_API_KEY")
+
+    // from := mail.NewEmail("Podgrasp", "YOUR_SENDGRID_VERIFIED_SENDER_EMAIL_ADDRESS")
+    // subject := "New Podcast Notes From ${Insert Podcast Name Here}"
+    // to := mail.NewEmail("Example User", "USER_EMAIL_ADDRESS")
+    // plainTextContent := "Boop beep bap"
+    // htmlContent := PodcastHTML
+    // message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+    // client := sendgrid.NewSendClient(sendgridKey)
+    // response, err := client.Send(message)
+    // if err != nil {
+    //  log.Println(err)
+    // } else {
+    //  fmt.Println(response.StatusCode)
+    //  fmt.Println(response.Body)
+    //  fmt.Println(response.Headers)
+    // }
 }
 
 func GetPodcastNotes(podcastURL string) (string) {
@@ -85,3 +86,6 @@ func GetPodcastNotes(podcastURL string) (string) {
     return article
 }
 
+func FormatEmail(article string) (string) {
+    return article
+}
