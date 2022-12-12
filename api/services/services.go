@@ -2,12 +2,15 @@ package services
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
 	"github.com/joho/godotenv"
+	"golang.org/x/net/html"
 )
 
 type UrlRequestBody struct {
@@ -16,6 +19,10 @@ type UrlRequestBody struct {
 
 type Article struct {
     Article string `json:"article"`
+}
+
+type PodcastFile struct {
+    ArticleBip string
 }
 
 func EllorM8(ctx *gin.Context) {
@@ -43,7 +50,15 @@ func SendEmail(ctx *gin.Context) {
     
     var PodcastHTML = GetPodcastNotes(requestBody.URL);
 
+    if err != nil {
+        log.Fatal("Failure getting podcast notes: ", err)
+    }
+
     var FormattedEmail = FormatEmail(PodcastHTML);
+
+    if err != nil {
+        log.Fatal("Failure formatting email: ", err)
+    }
 
     fmt.Println(FormattedEmail)
     
@@ -87,5 +102,28 @@ func GetPodcastNotes(podcastURL string) (string) {
 }
 
 func FormatEmail(article string) (string) {
-    return article
+    reader := strings.NewReader(article)
+    tokenizer := html.NewTokenizer(reader)
+    for {
+        tt := tokenizer.Next()
+        if tt == html.ErrorToken {
+            if tokenizer.Err() == io.EOF {
+                return "lol"
+            }
+            fmt.Printf("Error: %v", tokenizer.Err())
+            return "lol 2"
+        }
+        _, hasAttr := tokenizer.TagName()
+        if hasAttr {
+            for {
+                attrKey, attrValue, moreAttr := tokenizer.TagAttr()
+                fmt.Printf("Attr: %v\n", string(attrKey))
+                fmt.Printf("Attr: %v\n", string(attrValue))
+                fmt.Printf("Attr: %v\n", moreAttr)
+                if !moreAttr {
+                    break
+                }
+            }
+        }
+    }
 }
