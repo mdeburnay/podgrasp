@@ -2,27 +2,24 @@ package services
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"strings"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
 	"github.com/joho/godotenv"
-	"golang.org/x/net/html"
 )
 
 type UrlRequestBody struct {
     URL string `json:"url"`
 }
 
-type Article struct {
-    Article string `json:"article"`
-}
-
-type PodcastFile struct {
-    ArticleBip string
+type PodcastArticle struct {
+    Date string `json:"date"`
+    Title string `json:"title"`
+    Headers map[int]string `json:"headers"`
+    Sections map[int]interface{} `json:"sections"`
 }
 
 func EllorM8(ctx *gin.Context) {
@@ -41,26 +38,28 @@ func SendEmail(ctx *gin.Context) {
 		log.Fatal("Error loading .env file")
 	}
 
-    var requestBody UrlRequestBody
+    requestBody := UrlRequestBody{}
 
     if err := ctx.ShouldBindJSON(&requestBody); err != nil {
         ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
     
-    var PodcastHTML = GetPodcastNotes(requestBody.URL);
+    fmt.Println("Sending...")
+
+    PodcastHTML := GetPodcastNotes(requestBody.URL);
 
     if err != nil {
         log.Fatal("Failure getting podcast notes: ", err)
     }
 
-    var FormattedEmail = FormatEmail(PodcastHTML);
+    FormattedArticle := FormatEmail(PodcastHTML)
 
     if err != nil {
         log.Fatal("Failure formatting email: ", err)
     }
 
-    fmt.Println(FormattedEmail)
+    fmt.Println(FormattedArticle.Headers)
     
     // sendgridKey := os.Getenv("SENDGRID_API_KEY")
 
@@ -81,49 +80,73 @@ func SendEmail(ctx *gin.Context) {
     // }
 }
 
-func GetPodcastNotes(podcastURL string) (string) {
-	fmt.Println("Getting podcast notes for: " + podcastURL)
-    var article string
+func GetPodcastNotes(podcastURL string) (PodcastArticle) {
+
+    headers := make(map[int]string)
+
+    sections := make(map[int]interface{})
+
     c := colly.NewCollector(
         colly.AllowedDomains("www.podcastnotes.org", "podcastnotes.org"),
     )
 
     c.OnHTML("article", func(e *colly.HTMLElement) {
-        articleHTML, err := e.DOM.Html()
-        if err != nil {
-            log.Fatal(err)
-        }
-        article = articleHTML
+
+        e.DOM.Find("header")
+
+        e.ForEach("h4", func(i int, e *colly.HTMLElement) {
+            headers[i] = e.Text
+        })
+
+        e.ForEach("ul", func(i int, elem *colly.HTMLElement) {
+            section := make(map[int]string)
+            elem.ForEach("li", func(i int, e *colly.HTMLElement) {
+                section[i] = e.Text
+            })
+            sections[i] = section
+        })
     })
 
     c.Visit(podcastURL)
 
-    return article
+    finishedPodcast := PodcastArticle{
+        Date: "2020-01-01",
+        Title: "Test",
+        Headers: headers,
+        Sections: sections,
+    }
+
+    return finishedPodcast
 }
 
-func FormatEmail(article string) (string) {
-    reader := strings.NewReader(article)
-    tokenizer := html.NewTokenizer(reader)
-    for {
-        tt := tokenizer.Next()
-        if tt == html.ErrorToken {
-            if tokenizer.Err() == io.EOF {
-                return "lol"
-            }
-            fmt.Printf("Error: %v", tokenizer.Err())
-            return "lol 2"
-        }
-        _, hasAttr := tokenizer.TagName()
-        if hasAttr {
-            for {
-                attrKey, attrValue, moreAttr := tokenizer.TagAttr()
-                fmt.Printf("Attr: %v\n", string(attrKey))
-                fmt.Printf("Attr: %v\n", string(attrValue))
-                fmt.Printf("Attr: %v\n", moreAttr)
-                if !moreAttr {
-                    break
-                }
-            }
-        }
+func FormatEmail(article PodcastArticle) (PodcastArticle) {
+    articleHeaders := article.Headers
+    articleSections := article.Sections
+
+    // Sort Article Headers
+    headerKeys := make([]int, 0, len(articleHeaders))
+
+    for k := range articleHeaders {
+        headerKeys = append(headerKeys, k)
     }
+
+    sort.Ints(headerKeys)
+
+    // Sort Article Sections
+    sectionKeys := make([]int, 0, len(articleSections))
+
+    for k := range articleSections {
+        sectionKeys = append(sectionKeys, k)
+    }
+
+    sort.Ints(sectionKeys)
+
+    formattedArticle := PodcastArticle{
+        Date: article.Date,
+        Title: article.Title,
+        Headers: articleHeaders,
+        Sections: articleSections,
+    }
+
+    return formattedArticle
 }
