@@ -1,0 +1,8 @@
+<mj-section>
+  <mj-column>
+    <mj-divider border-color="#DDAA1E"></mj-divider>
+    <mj-text align="center">No longer wanting to receive Podcast Notes?</mj-text>
+    <mj-text align="center" text-decoration="underline">Unsubscribe</mj-text>
+  </mj-column>
+</mj-section>
+

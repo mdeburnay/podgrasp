@@ -1,6 +1,0 @@
-<mj-section>
-    <mj-column>
-    <mj-text font-size="35px" color="#000000" align="center" font-family="helvetica">PODGRASP</mj-text>
-    <mj-divider border-color="#DDAA1E" border-width="4px"></mj-divider>
-    </mj-column>
-</mj-section>

@@ -1,0 +1,7 @@
+<mjml>
+    <mj-body background-color="#FFFFFF">
+        <mj-include path="../components/header.mjml" />
+        <mj-include path="../components/body.mjml" />
+        <mj-include path="../components/footer.mjml" />
+    </mj-body>
+</mjml>
