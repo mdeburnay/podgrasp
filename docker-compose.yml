@@ -1,34 +1,32 @@
 version: "3.8"
 
 services:
-  api:
-    container_name: backend
-    image: backend:1.0.0
+  auth:
     build:
-      context: ./backend
+      context: ./auth
       dockerfile: Dockerfile
+    restart: always
     ports:
-      - 9090:9090
-    volumes:
-      - ./backend:/usr/src/app
-    env_file:
-      - .env
-    networks:
-      - podgrasp-network
-  client:
-    container_name: client
-    image: client:1.0.0
-    build:
-      context: ./client
-      dockerfile: Dockerfile
+      - "8080:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=postgres dbname=users sslmode=disable timezone=UTC connect_timeout=5"
+
+  postgres:
+    image: postgres:latest
     ports:
-      - 8080:8080
+      - "5432:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: users
     volumes:
-      - ./client:/usr/src/app
-      - /usr/src/app/node_modules
-    env_file:
-      - .env
-    networks:
-      - podgrasp-network
+      - ./db-data/postgres/:/var/lib/postgresql/data/
 networks:
   podgrasp-network:
