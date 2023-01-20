@@ -1,37 +1,69 @@
 package main
 
 import (
-	"auth/data"
+	"auth/cmd/routes"
 	"database/sql"
-	"fmt"
 	"log"
-	"net/http"
+	"os"
+	"time"
+
+	"github.com/gin-contrib/cors"
 )
 
-const port = "80"
+const PORT = "80"
 
-type Config struct {
-	DB *sql.DB
-	Models data.Models
-}
+var counts int64
 
 func main() {
-	log.Println("Starting authentication service on port: ", port)
+	log.Println("Starting authentication service on port: ", PORT)
 
 	// TODO: Connect to database
-
-	// Set up Config
-
-	app := Config{}
-
-	server := &http.Server{
-		Addr: fmt.Sprintf(":%s", port),
-		Handler: app.routes(),
+	conn := connectToDB()
+	if conn == nil {
+		log.Panicln("Could not connect to database")
 	}
 
-	err := server.ListenAndServe()
+	r := routes.AuthRouter()
+	r.Use(cors.Default())
+	_ = r.Run(":" + PORT)
+	log.Println("Authentication service started on port: ", PORT)
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("pgx", dsn)
 
 	if err != nil {
-		log.Panic("Error starting server: ", err)
+		return nil, err
+	}
+
+	err = db.Ping()
+		if err != nil {
+			return nil, err
+	}
+
+	return db, nil
+}
+
+func connectToDB() *sql.DB {
+	dsn := os.Getenv("DSN")
+
+	for {
+		connection, err := openDB(dsn)
+		if err != nil {
+		 log.Println("Error connecting to database: ", err)
+		 counts++
+		} else {
+			log.Println("Connected to database after ", counts, " attempts")
+			return connection
+		}
+
+		if counts > 10 {
+			log.Panicln(err)
+			return nil
+		}
+		
+		log.Panicln("Backing off...")
+		time.Sleep(2 * time.Second)
+		continue
 	}
 }
