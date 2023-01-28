@@ -1,24 +1,18 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-type jsonResponse struct {
-	Error bool `json:"error"`
-	Message string `json:"message"`
-	Data any `json:"data,omitempty"`
-}
 
-func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
+
+func (app *Config) Broker(ctx *gin.Context) {
 	payload := jsonResponse{
 		Error: false,
 		Message: "Hit the broker",
 	}
 
-	out, _ := json.MarshalIndent(payload, "", "\t")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusAccepted)
-	w.Write(out)
+	_ = app.writeJson(ctx, http.StatusOK, payload)
 }

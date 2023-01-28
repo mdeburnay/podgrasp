@@ -12,10 +12,10 @@ const PORT = "80"
 type Config struct {}
 
 func main() {
-	log.Println("Starting broker service on port: ", PORT)
+	log.Println("Starting Broker service on port: ", PORT)
 
 	r := routes.BrokerRouter()
 	r.Use(cors.Default())
-	_ = r.Run(":" + PORT)
-	log.Println("Authentication service started on port: ", PORT)
+	_ = r.Run(PORT)
+	log.Println("Broker service started on port: ", PORT)
 }
