@@ -3,6 +3,6 @@ FROM alpine:latest
 
 RUN mkdir /app
 
-COPY broker /app
+COPY auth /app
 
-CMD [ "/app/broker" ]
+CMD ["/app/auth"]

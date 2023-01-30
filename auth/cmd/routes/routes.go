@@ -9,7 +9,7 @@ import (
 
 func AuthRouter() *gin.Engine {
 	r := gin.Default()
-
+	
 	r.Use(cors.Default())
 
 	r.GET("/", func(c *gin.Context) {

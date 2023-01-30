@@ -16,6 +16,6 @@ func main() {
 
 	r := routes.BrokerRouter()
 	r.Use(cors.Default())
-	_ = r.Run(PORT)
+	r.Run(":" + PORT)
 	log.Println("Broker service started on port: ", PORT)
 }
