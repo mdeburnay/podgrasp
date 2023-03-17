@@ -1,6 +1,6 @@
-FRONT_END_BINARY=frontApp
-BROKER_BINARY=brokerApp
-AUTH_BINARY=authApp
+FRONT_END_BINARY=frontend
+BROKER_BINARY=broker
+AUTH_BINARY=auth
 
 ## up: starts all containers in the background without forcing build
 up:
