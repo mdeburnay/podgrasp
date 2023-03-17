@@ -1,46 +1,52 @@
-FRONTEND_BINARY=FRONTEND_BINARY
-BROKER_BINARY=BROKER_BINARY
+FRONT_END_BINARY=frontApp
+BROKER_BINARY=brokerApp
+AUTH_BINARY=authApp
 
-## UP: Starts all containers in the background without forcing a build.
-up: 
-	@echo "Starting Docker image..."
-	@docker-compose up -d
-	@echo "Docker images started."
+## up: starts all containers in the background without forcing build
+up:
+	@echo "Starting Docker images..."
+	docker-compose up -d
+	@echo "Docker images started!"
 
-## UP_BUILD: Builds all containers and starts them in the background.
-up_build:
-	@echo "Stopping Docker images (if running...)"
-	@docker-compose down
-	@echo "Building Docker images."
-	@docker-compose up --build -d
-	@echo "Docker images built and started."
+## up_build: stops docker-compose (if running), builds all projects and starts docker compose
+up_build: build_broker build_auth
+	@echo "Stopping docker images (if running...)"
+	docker-compose down
+	@echo "Building (when required) and starting docker images..."
+	docker-compose up --build -d
+	@echo "Docker images built and started!"
 
-## DOWN: Stops all containers.
-down: 
-	@echo "Stopping Docker images..."
-	@docker-compose down
-	@echo "Docker images stopped."
+## down: stop docker compose
+down:
+	@echo "Stopping docker compose..."
+	docker-compose down
+	@echo "Done!"
 
-## BUILD: builds the binaries as linux executables
-build:
+## build_broker: builds the broker binary as a linux executable
+build_broker:
 	@echo "Building broker binary..."
 	cd ./broker && env GOOS=linux CGO_ENABLED=0 go build -o ${BROKER_BINARY} ./cmd/api
-	cd ./frontend && env GOOS=linux CGO_ENABLED=0 go build -o ${FRONTEND_BINARY} ./cmd/web
 	@echo "Done!"
 
-## BUILD_FRONT
+## build_auth: builds the auth binary as a linux executable
+build_auth:
+	@echo "Building auth binary..."
+	cd ./auth && env GOOS=linux CGO_ENABLED=0 go build -o ${AUTH_BINARY} ./cmd/api
+	@echo "Done!"
+
+## build_front: builds the front end binary
 build_front:
 	@echo "Building front end binary..."
-	cd ./frontend && env CGO_ENABLED=0 go build -o ${FRONTEND_BINARY} ./cmd/web
+	cd ./frontend && env CGO_ENABLED=0 go build -o ${FRONT_END_BINARY} ./cmd/web
 	@echo "Done!"
 
-## START: starts the front end
+## start: starts the front end
 start: build_front
 	@echo "Starting front end"
-	cd ./frontend && ./${FRONTEND_BINARY}
+	cd ../frontend && ./${FRONT_END_BINARY} &
 
-## STOP: stop the front end
+## stop: stop the front end
 stop:
 	@echo "Stopping front end..."
-	@-pkill -SIGTERM -f "./${FRONTEND_BINARY}"
+	@-pkill -SIGTERM -f "./${FRONT_END_BINARY}"
 	@echo "Stopped front end!"
