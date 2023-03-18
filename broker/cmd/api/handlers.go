@@ -37,13 +37,13 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 
 	switch requestPayload.Action {
 	case "auth":
-		app.authenticate(w, requestPayload.Auth)
+		app.Authenticate(w, requestPayload.Auth)
 	default:
 		app.errorJSON(w, errors.New("Unknown action"))
 	}
 }
 
-func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
+func (app *Config) Authenticate(w http.ResponseWriter, a AuthPayload) {
 	// Create some JSon we'll send to the auth microservice
 	jsonData, _ := json.MarshalIndent(a, "", "\t")
 

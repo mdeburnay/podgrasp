@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  broker-service:
+  broker:
     build:
       context: ./broker
       dockerfile: Dockerfile
@@ -11,8 +11,7 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-
-  authentication-service:
+  auth:
     build:
       context: ./auth
       dockerfile: Dockerfile
@@ -24,7 +23,6 @@ services:
       replicas: 1
     environment:
       DSN: "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5"
-
   postgres:
     image: "postgres:14.0"
     ports:
