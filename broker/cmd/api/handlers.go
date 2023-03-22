@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 )
 
@@ -50,6 +51,7 @@ func (app *Config) Authenticate(w http.ResponseWriter, a AuthPayload) {
 	// Call the service
 	request, err := http.NewRequest("POST", "http://auth/authenticate", bytes.NewBuffer(jsonData))
 	if err != nil {
+		log.Panicln("Error sending to Auth: ", err)
 		app.errorJSON(w, err)
 		return
 	}
@@ -68,7 +70,7 @@ func (app *Config) Authenticate(w http.ResponseWriter, a AuthPayload) {
 		app.errorJSON(w, errors.New("Invalid Credentials"))
 		return
 	} else if response.StatusCode != http.StatusAccepted {
-		app.errorJSON(w, errors.New("Error calling the Auth service"))
+		app.errorJSON(w, errors.New("Error calling the Auth service"), response.StatusCode)
 		return
 	}
 

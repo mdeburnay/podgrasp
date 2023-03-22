@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -12,20 +13,25 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 
+	log.Println("Authenticating...")
+
 	err := app.readJSON(w, r, &requestPayload)
 	if err != nil {
+		log.Println("Error reading JSON: ", err)
 		app.errorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	user, err := app.Models.User.GetByEmail(requestPayload.Email)
 	if err != nil {
+		log.Println("Error reading user email: ", err)
 		app.errorJSON(w, errors.New("Invalid credentials"), http.StatusBadRequest)
 		return
 	}
 
 	valid, err := user.PasswordMatches(requestPayload.Password)
 	if err != nil || !valid {
+		log.Println("Error reading user password: ", err)
 		app.errorJSON(w, errors.New("Invalid credentials"), http.StatusBadRequest)
 		return
 	}
