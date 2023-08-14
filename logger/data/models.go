@@ -21,6 +21,7 @@ func New(mongo *mongo.Client) Models {
 	}
 }
 
+// 
 type Models struct {
 	LogEntry LogEntry
 }
