@@ -29,6 +29,7 @@ func main() {
 
 	client = mongoClient
 
+	// create a context in order to gracefully shutdown the server
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
